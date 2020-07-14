@@ -1,0 +1,13 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <form>
+            <div class="form-group">
+                <label for="content">What's happening?</label>
+                <textarea class="form-control" id="content" rows="3" name="content"></textarea>
+            </div>
+            <button type="submit" class="btn btn-dark">Post</button>
+        </form>
+    </div>
+{% endblock %}
