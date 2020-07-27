@@ -1,70 +1,87 @@
 {% extends "network/layout.html" %}
 {% load tz %}
 
-{% block head %}
-<script type="text/javascript">
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+{% block body %}
+    <div class="container">
+        <div id="follow">
+
+        </div>
+        <script type="text/babel">
+            class Follow extends React.Component{
+                constructor(props){
+                    super(props);
+                    {% if current_state %}
+                        this.state = {
+                            current_state: "Unfollow",
+                            follower: {{ followers }},
+                            following: {{ following }}
+                        };
+                    {% else %}
+                        this.state = {
+                            current_state: "Follow",
+                            follower: {{ followers }},
+                            following: {{ following }}
+                        };
+                    {% endif %}
+                }
+                render(){
+                    return(
+                        <div>
+                            <h1 style={% verbatim %}{{display: "inline"}}{% endverbatim %}>{{ user_details.username }}</h1>
+                            {% if user_details.id != user.id %}
+                                {% if user.is_authenticated %}
+                                <button onClick = {this.follow} type="button" className="btn btn-dark" style={% verbatim %}{{float: "right", marginRight: "10%", display: "inline"}}{% endverbatim %}>{this.state.current_state}</button>
+                                {% endif %}
+                            {% endif %}
+                            <div className="container" style={% verbatim %}{{paddingLeft: "20%", paddingRight: "20%"}}{% endverbatim %}>
+                                <h4>Followers: { this.state.follower } <span style={% verbatim %}{{float: "right"}}{% endverbatim %}>Following: { this.state.following }</span></h4>
+                            </div>
+                        </div>
+
+                    );
+                }
+                follow = ()=>{
+                    console.log(this.state.current_state)
+                    if(this.state.current_state === "Follow"){
+                        fetch("/follow/{{ user.id }}/{{ user_details.id }}");
+                        this.setState(state=>({
+                            follower: state.follower + 1,
+                            current_state: "Unfollow"
+                        }));
+                    }
+                    else{
+                        fetch("/follow/{{ user.id }}/{{ user_details.id }}");
+                        this.setState(state=>({
+                            follower: state.follower - 1,
+                            current_state: "Follow"
+                        }));
+                    }
                 }
             }
-        }
-        return cookieValue;
-    }
-    const csrftoken = getCookie('csrftoken');
-    function csrfSafeMethod(method) {
-        // these HTTP methods do not require CSRF protection
-        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
-    $.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
-    }
-    });
-</script>
-{% endblock %}
+            ReactDOM.render(<Follow />, document.querySelector("#follow"));
+        </script>
 
-{% block body %}
 
-    {% if user.is_authenticated %}
-        <div class="container">
-            <form action="{% url 'index' %}" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="content">What's happening?</label>
-                    <textarea class="form-control" id="content" rows="3" name="content"></textarea>
-                </div>
-                <button type="submit" class="btn btn-dark">Post</button>
-            </form>
-        </div>
-    {% endif %}
+    </div>
+    <div class="container">
     {% for post in posts %}
-
         <div class="container">
-            <div class="card post" id = "{{ post.id }}">
+            <div class="card post" id="{{ post.id }}">
                 <div class="card-header">
-                    <a href="{% url 'user' post.user %}" style="color: black; display: inline;"> {{ post.user.username }} </a>
+                    <a href="{% url 'user' post.user %}" style="color: black;"> {{ post.user.username }} </a>
                     {% if post.user == user %}
                         <button class="edit_post" style="display: inline; float: right;border: none;"><i class="fa fa-edit"></i></button>
                     {% endif %}
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title" >{{ post.content }}</h5>
+                    <h5 class="card-title">{{ post.content }}</h5>
                 </div>
                 <div class="card-footer">
                     {% if post.user.username != user.username %}
                         <div class="likes" id="p{{ post.id }}">
 
                         </div>
+
                         <script type="text/babel">
                             class App extends React.Component {
                                 constructor(props){
@@ -86,7 +103,7 @@
 
                                         <div style={% verbatim %}{{display: "inline"}}{% endverbatim %}>
                                             {% if user.is_authenticated %}
-                                                <button onClick={this.likes} style={% verbatim %}{{border: "none"}}{% endverbatim %}>{this.state.emoji}</button>
+                                                <button className="like" onClick={this.likes} style={% verbatim %}{{border: "none"}}{% endverbatim %}>{this.state.emoji}</button>
                                             {% else %}
                                                 <button style={% verbatim %}{{border: "none"}}{% endverbatim %}>{this.state.emoji}</button>
                                             {% endif %}
@@ -123,10 +140,11 @@
                             <span style="float: right;">{{ post.time_stamp | localtime }}</span>
                         </div>
                     {% endif %}
+
                 </div>
             </div>
         </div>
-
+    </div>
     {% endfor %}
     <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
@@ -218,4 +236,5 @@
             {% endif %}
         </ul>
     </nav>
+
 {% endblock %}

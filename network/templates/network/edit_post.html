@@ -1,0 +1,17 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <form action="{% url 'edit' post.id%}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="content">Edit</label>
+                    <textarea class="form-control" id="content" rows="3" name="content" >{{post.content}}</textarea>
+                </div>
+                <button type="submit" class="btn btn-dark">Save</button>
+            </form>
+        </div>
+    {% endif %}
+
+{% endblock %}
