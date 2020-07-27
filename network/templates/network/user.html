@@ -34,7 +34,8 @@
                                 {% endif %}
                             {% endif %}
                             <div className="container" style={% verbatim %}{{paddingLeft: "20%", paddingRight: "20%"}}{% endverbatim %}>
-                                <h4>Followers: { this.state.follower } <span style={% verbatim %}{{float: "right"}}{% endverbatim %}>Following: { this.state.following }</span></h4>
+                                <h4 style={% verbatim %}{{display: "inline"}}{% endverbatim %}>Followers: { this.state.follower } </h4>
+                                <h4 style={% verbatim %}{{float: "right", display: "inline"}}{% endverbatim %}>Following: { this.state.following }</h4>
                             </div>
                         </div>
 
